@@ -6,7 +6,6 @@ import csv
 import random
 import statistics
 
-# kategória -> alap arány a költött összegből
 KATEGORIAK = {
     "kaja": 0.28,
     "lakas": 0.30,
@@ -18,7 +17,6 @@ KATEGORIAK = {
     "egyeb": 0.12,
 }
 
-# megjelenítendő (ékezetes) nevek
 CIMKEK = {
     "kaja": "Kaja",
     "lakas": "Lakás",
@@ -30,14 +28,13 @@ CIMKEK = {
     "egyeb": "Egyéb",
 }
 
-SAV = 0.15          # +/-15% fizetési sáv a "hasonló" ügyfelekhez
-MIN_HASONLO = 10    # ennél kevesebb hasonló esetén a fizetés szerint legközelebbiek
-KUSZOB = 0.10       # +/-10% eltérésen belül "átlagos"
-
+SAV = 0.15          
+MIN_HASONLO = 10    
+KUSZOB = 0.10       
 
 def fizetes_generalas_NKK(rng: random.Random) -> int:
     """Havi nettó fizetés Ft-ban, 200 ezer és 1,5 millió között, 1000-esre kerekítve."""
-    ertek = rng.lognormvariate(12.9, 0.4)  # medián kb. 400 ezer
+    ertek = rng.lognormvariate(12.9, 0.4)  
     ertek = min(max(ertek, 200_000), 1_500_000)
     return int(round(ertek, -3))
 
@@ -46,7 +43,7 @@ def ugyfel_generalas_NKK(rng: random.Random, ugyfel_id: int) -> dict:
     """Egy ügyfél fizetése és kategóriánkénti költése; az összeg sosem haladja meg a fizetést."""
     fizetes = fizetes_generalas_NKK(rng)
     szint = min(fizetes / 1_500_000, 1)
-    # a magasabb fizetésűek arányaiban kisebb részt költenek el (többet megtakarítanak)
+    
     keret = fizetes * (rng.uniform(0.55, 1.0) - 0.1 * szint)
 
     sulyok = {}
@@ -60,7 +57,7 @@ def ugyfel_generalas_NKK(rng: random.Random, ugyfel_id: int) -> dict:
 
     sor = {"ugyfel_id": ugyfel_id, "fizetes": fizetes}
     for nev, suly in sulyok.items():
-        # lefelé kerekítés 100 Ft-ra: az összeg így sosem lépi túl a fizetést
+        
         sor[nev] = int(keret * suly / osszeg // 100 * 100)
     return sor
 
@@ -72,7 +69,7 @@ def adat_generalas_NKK(db: int, seed: int | None = None) -> list[dict]:
 
 def csv_mentes_NKK(sorok: list[dict], fajl: str) -> None:
     mezok = ["ugyfel_id", "fizetes", *KATEGORIAK]
-    # utf-8-sig: az Excel is helyesen nyitja meg
+    
     with open(fajl, "w", newline="", encoding="utf-8-sig") as f:
         iro = csv.DictWriter(f, fieldnames=mezok)
         iro.writeheader()
@@ -144,7 +141,7 @@ class KoltesElemzoNKK:
             "atlag": atlag,
             "elteres": sajat - atlag,
             "szazalek": (sajat - atlag) / atlag if atlag else 0.0,
-            # a hasonlók hány része költ ennél kevesebbet
+            
             "helyezes": sum(1 for e in ertekek if e < sajat) / len(ertekek),
             "minosites": self.minosit_NKK(sajat, atlag),
         }

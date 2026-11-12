@@ -143,7 +143,7 @@ class KoltesAblakNKK:
         self.kiveve_id = ugyfel["ugyfel_id"]
         self.osszeg_frissit_NKK()
         self.ertekel_NKK()
-        return "break"  # a gyökérablak <Return> kötése ne fusson le másodszor
+        return "break" 
 
 
     def mezo_valtozas_NKK(self, *_args) -> None:
